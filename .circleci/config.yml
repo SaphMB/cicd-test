@@ -1,0 +1,186 @@
+version: 2.1
+
+jobs:
+  clone-repo:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Clone kratix repo
+          command : |
+            kratix_sha=$(jq -r .kratix_version release.json)
+            git clone https://github.com/SaphMB/kratix-cicd.git && cd kratix-cicd
+            git checkout $kratix_sha
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  kratix-tests:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Run Unit Tests
+          command : |
+            echo "go test ../..."
+      - run:
+          name: Run System Tests
+          command : |
+            echo "go test ../.."
+      - run:
+          name: Run Integration Tests
+          command : |
+            echo "go test ../.."
+
+  kratix-acceptance-tests:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Run Other Tests
+          command : |
+            echo "go test ../..."
+
+  helm-integration-tests:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Clone Helm Repo
+          command: |
+            echo "Helm git clone"
+      - run:
+          name: Test Kratix Helm Chart
+          command : |
+            echo "Helm Install..."
+            echo "go test ../..."
+      - run:
+          name: Test Kratix Destination Helm Chart
+          command : |
+            echo "Helm Install..."
+            echo "go test ../..."
+
+  kratix-cli-integration-tests:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Test Kratix CLI
+          command : |
+            echo "go build..."
+            echo "go test ../..."
+
+  release-kratix:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Build and push images
+          command : |
+            echo "Docker push..."
+      - run:
+          name: Deploy Helm Chart
+          command : |
+            echo "Calling github action"
+
+  ske-core-tests:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Run SKE Tests
+          command : |
+            echo "go test ../..."
+
+  ske-acceptance-tests:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Run SKE Upgrade Tests
+          command : |
+            echo "go test ../..."
+
+  ske-integration-tests:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Run Helm Chart Tests
+          command : |
+            echo "go test ../..."
+      - run:
+          name: Run SKE Operator Tests
+          command : |
+            echo "go test ../..."
+      - run:
+          name: Run SKE CLI Tests
+          command : |
+            echo "go test ../..."
+      - run:
+          name: Run Healthcheck Agent Tests
+          command : |
+            echo "go test ../..."
+      - run:
+          name: Run Terraform Aspect Tests
+          command : |
+            echo "go test ../..."
+      - run:
+          name: Run Backstage Promise Tests
+          command : |
+            echo "go test ../..."
+
+  security-scan:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Run Security scan
+          command : |
+            echo "snyk snyk snyk"
+
+  update-oss-kratix-in-ske:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Update OSS Kratix Submodule
+          command: |
+            echo "git commit ..."
+
+  cut-ske-release:
+    docker:
+      - image: cimg/base:2022.03
+    steps:
+      - run:
+          name: Package and release ske
+          command : |
+            echo "go test ../..."
+
+workflows:
+  run-ci:
+    jobs:
+      - clone-repo
+      - kratix-tests:
+          requires: [clone-repo]
+      - kratix-acceptance-tests:
+          requires: [kratix-tests]
+      - helm-integration-tests:
+          requires: [kratix-acceptance-tests]
+      - kratix-cli-integration-tests:
+          requires: [kratix-acceptance-tests]
+      - release-kratix:
+          requires: [kratix-acceptance-tests]
+      - ske-core-tests:
+          requires: [clone-repo]
+      - ske-acceptance-tests:
+          requires: [ske-core-tests]
+      - ske-integration-tests:
+          requires: [ske-acceptance-tests]
+      - security-scan:
+          requires: [ske-acceptance-tests]
+      - update-oss-kratix-in-ske:
+          requires: [security-scan]
+      - cut-ske-release:
+          requires: [update-oss-kratix-in-ske]
