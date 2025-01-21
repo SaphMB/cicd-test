@@ -5,6 +5,7 @@ jobs:
     docker:
       - image: cimg/base:2022.03
     steps:
+      - checkout
       - run:
           name: Clone kratix repo
           command : |
