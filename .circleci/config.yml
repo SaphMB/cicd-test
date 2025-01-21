@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  clone-repo:
+  clone-repositories:
     docker:
       - image: cimg/base:2022.03
     steps:
@@ -163,9 +163,9 @@ jobs:
 workflows:
   run-ci:
     jobs:
-      - clone-repo
+      - clone-repositories
       - kratix-tests:
-          requires: [clone-repo]
+          requires: [clone-repositories]
       - kratix-acceptance-tests:
           requires: [kratix-tests]
       - helm-integration-tests:
@@ -175,7 +175,7 @@ workflows:
       - release-kratix:
           requires: [kratix-acceptance-tests]
       - ske-core-tests:
-          requires: [clone-repo]
+          requires: [clone-repositories]
       - ske-acceptance-tests:
           requires: [ske-core-tests]
       - ske-integration-tests:
