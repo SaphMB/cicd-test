@@ -1,0 +1,150 @@
+name: Release Kratix
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  clone-repositories:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v3
+      - name: Checkout ci repository
+        uses: actions/checkout@v3
+        with:
+          repository: SaphMB/cicd-test
+          token: ${{ secrets.ACTION_TOKEN }}
+        - run:
+          name: Clone kratix repo
+          run: |
+            set -eux
+            kratix_sha=$(jq -r .kratix_version release.json)
+            cd kratix-cicd
+            git checkout $kratix_sha
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  kratix-tests:
+    runs-on: ubuntu-latest
+    needs: clone-repositories
+    steps:
+      - name: Run Unit Tests
+        run: |
+          echo "go test ../..."
+      - name: Run System Tests
+        run: |
+          echo "go test ../.."
+      - name: Run Integration Tests
+        run: |
+          echo "go test ../.."
+
+  kratix-acceptance-tests:
+    needs: kratix-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Other Tests
+        run: |
+          echo "go test ../..."
+
+  helm-integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+    neds: kratix-acceptance-tests
+      - name: Clone Helm Repo
+        command: |
+          echo "Helm git clone"
+      - name: Test Kratix Helm Chart
+        run: |
+          echo "Helm Install..."
+          echo "go test ../..."
+      - name: Test Kratix Destination Helm Chart
+        run: |
+          echo "Helm Install..."
+          echo "go test ../..."
+
+  kratix-cli-integration-tests:
+    needs: kratix-acceptance-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Kratix CLI
+        run: |
+          echo "go build..."
+            echo "go test ../..."
+
+  release-kratix:
+    runs-on: ubuntu-latest
+    needs: kratix-acceptance-tests
+    steps:
+      - name: Build and push images
+        run: |
+          echo "runs-on  ubuntu-latestame: Deploy Helm Chart
+      - name: Deploy Helm Charts  
+        run: |
+          echo "Calling github action"
+
+  ske-core-tests:
+    runs-on: ubuntu-latest
+    needs: clone-repositories
+    steps:
+      - name: Run SKE Tests
+        run: |
+          echo "go test ../..."
+
+  ske-acceptance-tests:
+    runs-on: ubuntu-latest
+    needs: ske-core-tests
+    steps:
+      - name: Run SKE Upgrade Tests
+        run: |
+          echo "go test ../..."
+
+  ske-integration-tests:
+    runs-on: ubuntu-latest
+    needs: ske-acceptance-tests
+    steps:
+      - name: Run Helm Chart Tests
+        run: |
+          echo "go test ../..."
+      - name: Run SKE Operator Tests
+        run: |
+          echo "go test ../..."
+      - name: Run SKE CLI Tests
+        run: |
+          echo "go test ../..."
+      - name: Run Healthcheck Agent Tests
+        run: |
+          echo "go test ../..."
+      - name: Run Terraform Aspect Tests
+        run: |
+          echo "go test ../..."
+      - name: Run Backstage Promise Tests
+        run: |
+          echo "go test ../..."
+
+  security-scan:
+    needs: ske-acceptance-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Security scan
+        run: |
+          echo "snyk snyk snyk"
+
+  update-oss-kratix-in-ske:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update OSS Kratix Submodule
+        command: |
+          echo "git commit ..."
+
+  cut-ske-release:
+    runs-on: ubuntu-latest
+    needs: update-oss-kratix-in-ske
+    steps:
+      - name: Package and release ske
+        run: |
+          echo "go test ../..."
