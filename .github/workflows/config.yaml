@@ -16,17 +16,12 @@ jobs:
         with:
           repository: SaphMB/cicd-test
           token: ${{ secrets.ACTION_TOKEN }}
-        - run:
-          name: Clone kratix repo
-          run: |
-            set -eux
-            kratix_sha=$(jq -r .kratix_version release.json)
-            cd kratix-cicd
-            git checkout $kratix_sha
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
+      - name: Clone kratix repo
+        run: |
+          set -eux
+          kratix_sha=$(jq -r .kratix_version release.json)
+          cd kratix-cicd
+          git checkout $kratix_sha
 
   kratix-tests:
     runs-on: ubuntu-latest
@@ -52,10 +47,10 @@ jobs:
 
   helm-integration-tests:
     runs-on: ubuntu-latest
+    needs: kratix-acceptance-tests
     steps:
-    neds: kratix-acceptance-tests
       - name: Clone Helm Repo
-        command: |
+        run: |
           echo "Helm git clone"
       - name: Test Kratix Helm Chart
         run: |
@@ -138,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update OSS Kratix Submodule
-        command: |
+        run: |
           echo "git commit ..."
 
   cut-ske-release:
