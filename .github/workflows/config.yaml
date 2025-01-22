@@ -76,7 +76,7 @@ jobs:
     steps:
       - name: Build and push images
         run: |
-          echo "runs-on  ubuntu-latestame: Deploy Helm Chart
+          echo "Deploy Helm Chart"
       - name: Deploy Helm Charts  
         run: |
           echo "Calling github action"
