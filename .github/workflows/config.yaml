@@ -20,7 +20,7 @@ jobs:
         run: |
           set -eux
           kratix_sha=$(jq -r .kratix_version release.json)
-          cd kratix-cicd
+          git clone https://github.com/SaphMB/kratix-cicd.git && cd kratix-cicd
           git checkout $kratix_sha
 
   kratix-tests:
