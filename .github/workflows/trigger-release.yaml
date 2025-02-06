@@ -15,6 +15,8 @@ jobs:
           #   GITHUB_SHA=$(git rev-parse HEAD)
           #   GITHUB_MESSAGE=$(git log --format=%B -n 1 ${GITHUB_SHA})
           # fi
+          echo $GITHUB_SHA
+          echo $GITHUB_MESSAGE
           gh workflow run --repo SaphMB/cicd-test "Release Kratix" -f sha=$GITHUB_SHA -f message=$GITHUB_MESSAGE
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
