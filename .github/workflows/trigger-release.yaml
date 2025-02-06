@@ -11,10 +11,10 @@ jobs:
       - name: Trigger CI with latest commit details
         run: |
           GITHUB_MESSAGE="${{ github.event.head_commit.message }}"
-          if [ -z "$GITHUB_SHA" ]; then
-            GITHUB_SHA=$(git rev-parse HEAD)
-            GITHUB_MESSAGE=$(git log --format=%B -n 1 ${GITHUB_SHA})
-          fi
-          gh workflow run --repo SaphMB/ci "Release Kratix" -f sha=$GITHUB_SHA -f message=$GITHUB_MESSAGE
+          # if [ -z "$GITHUB_SHA" ]; then
+          #   GITHUB_SHA=$(git rev-parse HEAD)
+          #   GITHUB_MESSAGE=$(git log --format=%B -n 1 ${GITHUB_SHA})
+          # fi
+          gh workflow run --repo SaphMB/cicd-test "Release Kratix" -f sha=$GITHUB_SHA -f message=$GITHUB_MESSAGE
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
