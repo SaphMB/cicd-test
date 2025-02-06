@@ -17,4 +17,4 @@ jobs:
           fi
           gh workflow run --repo SaphMB/ci "Release Kratix" -f sha=$GITHUB_SHA -f message=$GITHUB_MESSAGE
         env:
-          GH_TOKEN: ${{ secrets.GH_ACTION_TRIGGER_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
