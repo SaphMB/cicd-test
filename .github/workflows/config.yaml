@@ -16,14 +16,7 @@ jobs:
       - name: Checkout ci repository
         uses: actions/checkout@v3
         with:
-          repository: SaphMB/cicd-test
-          token: ${{ secrets.ACTION_TOKEN }}
-      - name: Clone kratix repo
-        run: |
-          set -eux
-          kratix_sha=$(jq -r .kratix_version release.json)
-          git clone https://github.com/SaphMB/kratix-cicd.git && cd kratix-cicd
-          git checkout $kratix_sha
+          repository: SaphMB/kratix-cicd
 
   kratix-tests:
     runs-on: ubuntu-latest
